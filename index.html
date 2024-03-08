@@ -11,8 +11,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <div id="text">YUP (YUPDOWN)<br>GAME ENGINEERING STUDENT<br>COMPUTER GRAPHICS AFICIONADO<br><br>HAVE A NICE DAY ...</div>
+    <div id="container">
+        <canvas id="canvas">No support for WebGL fallback</canvas>
+        <div id="text">YUP (YUPDOWN)<br>GAME ENGINEERING STUDENT<br>COMPUTER GRAPHICS AFICIONADO<br><br>HAVE A NICE DAY ...</div>
+    </div>
 </body>
 <!-- vertex shader -->
 <script id="vertex-shader" type="x-shader/x-vertex">
@@ -307,10 +309,18 @@ for webgl-utils, m3, m4, and webgl-lessons-ui.
             var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 
             // Compute the projection matrix (orthographic projection)
-            if (aspect > 1)
+            // if the canvas is wider than it is tall use the height as the width
+            if (aspect > 1) {
                 var matrixProj = m4.orthographic(-aspect, aspect, -1, 1, -1, 1);
-            else
+                var fontSize = Math.floor(0.015 * gl.canvas.clientHeight);
+            }
+            else {
                 var matrixProj = m4.orthographic(-1, 1, -1 / aspect, 1 / aspect, -1, 1);
+                var fontSize = Math.floor(0.015 * gl.canvas.clientWidth);
+            }
+
+            // set the font-size of the text
+            document.getElementById("text").style.fontSize = fontSize + "px";
 
             // Set the matrix.
             gl.uniformMatrix4fv(viewLocation, false, m4.identity());
