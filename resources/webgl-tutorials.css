@@ -1,5 +1,6 @@
 /* Licensed under a BSD license. See ../license.html for license */
 
+
 html {
   box-sizing: border-box;
 }
@@ -20,6 +21,13 @@ body {
 
 canvas {
     display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#container {
+    position: relative;
+    display: block;
     width: 100vw;
     height: 100vh;
 }
@@ -33,10 +41,22 @@ canvas {
     font-optical-sizing: auto;
     font-weight: 300;
     font-style: normal;
-    font-size: 1em;
     word-spacing: 1em;
     letter-spacing: 0.5em;
     text-align: center;
+    color: white;
+    text-shadow: 0 2px 0 black;
+}
+
+#link {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-family: "Noto Sans KR", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+    font-size: 1em;
     color: white;
     text-shadow: 0 2px 0 black;
 }
