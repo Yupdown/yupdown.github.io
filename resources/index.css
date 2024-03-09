@@ -29,7 +29,7 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 80vmin;
+    width: 100%;
     min-height: 20px;
     padding: 5px;
     overflow: auto;
@@ -69,14 +69,13 @@ canvas {
 }
 
 #link {
-    padding-left: 0.8em;
+    padding-left: 0.5em;
     font-family: "Noto Sans KR", sans-serif;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
     font-size: 1vmin;
-    word-spacing: 1em;
-    letter-spacing: 0.8em;
+    letter-spacing: 0.5em;
     line-height: 2vmin;
     /*text box color set to white, text set to transparent*/
     background-color: white;
