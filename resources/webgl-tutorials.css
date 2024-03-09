@@ -6,7 +6,6 @@ html {
 }
 *, *:before, *:after {
   box-sizing: inherit;
-  user-select: none;
 }
 
 body {
@@ -25,6 +24,17 @@ canvas {
     height: 100%;
 }
 
+#auto-resize {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vmin;
+    min-height: 20px;
+    padding: 5px;
+    overflow: auto;
+}
+
 #container {
     position: relative;
     display: block;
@@ -32,33 +42,47 @@ canvas {
     height: 100vh;
 }
 
+#name {
+    font-family: "Noto Sans KR", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-style: normal;
+    font-size: 3vmin;
+    line-height: 4vmin;
+    text-align: center;
+    color: white;
+    text-shadow: 0 0.05em 0 black;
+}
+
 #text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     font-family: "Noto Sans KR", sans-serif;
     font-optical-sizing: auto;
     font-weight: 300;
     font-style: normal;
-    word-spacing: 1em;
-    letter-spacing: 0.5em;
+    font-size: 1vmin;
+    word-spacing: 0.5em;
+    letter-spacing: 0.3em;
+    line-height: 2vmin;
     text-align: center;
     color: white;
-    text-shadow: 0 2px 0 black;
+    text-shadow: 0 0.1em 0 black;
 }
 
 #link {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
+    padding-left: 0.8em;
     font-family: "Noto Sans KR", sans-serif;
     font-optical-sizing: auto;
-    font-weight: 300;
+    font-weight: 400;
     font-style: normal;
-    font-size: 1em;
-    color: white;
-    text-shadow: 0 2px 0 black;
+    font-size: 1vmin;
+    word-spacing: 1em;
+    letter-spacing: 0.8em;
+    line-height: 2vmin;
+    /*text box color set to white, text set to transparent*/
+    background-color: white;
+    color: #1492ad;
+    /* center aligned */
+    text-decoration: none;
 }
 
 #uiContainer {
