@@ -172,6 +172,11 @@ function main() {
         }
     }
 
+    // Get anisotropic filtering extension
+    var ext = gl.getExtension("EXT_texture_filter_anisotropic") ||
+              gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
+              gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic");
+
     // creates a texture info { width: w, height: h, texture: tex }
     // The texture will start with 1x1 pixels and be updated
     // when the image has loaded
@@ -185,7 +190,14 @@ function main() {
         // let's assume all images are not a power of 2
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        // Enable anisotropic filtering if available
+        if (ext) {
+            var maxAnisotropy = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+            gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+        }
 
         var textureInfo = {
             width: 1,   // we don't know the size until it loads
@@ -199,6 +211,15 @@ function main() {
 
             gl.bindTexture(gl.TEXTURE_2D, textureInfo.texture);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+            
+            // Generate mipmap for anisotropic filtering to work effectively
+            gl.generateMipmap(gl.TEXTURE_2D);
+            
+            // Reapply anisotropic filtering after image load
+            if (ext) {
+                var maxAnisotropy = gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+                gl.texParameterf(gl.TEXTURE_2D, ext.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
+            }
         });
         requestCORSIfNotSameOrigin(img, url);
         img.src = url;
