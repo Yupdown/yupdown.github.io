@@ -28,60 +28,7 @@
             <br>
         </div>
 </body>
-<!-- vertex shader -->
-<script id="vertex-shader" type="x-shader/x-vertex">
-    attribute vec4 a_position;
-    attribute vec2 a_texcoord;
-    attribute vec3 a_normal;
-
-    uniform mat4 u_mWorld;
-    uniform mat4 u_mView;
-    uniform mat4 u_mProj;
-
-    varying vec2 v_texcoord;
-    varying vec3 v_worldPos;
-    varying vec3 v_normal;
-
-    void main() {
-      // Multiply the position by the matrix.
-      gl_Position = u_mProj * u_mView * u_mWorld * a_position;
-
-      // Pass the texcoord to the fragment shader.
-      v_texcoord = a_texcoord;
-      v_worldPos = (u_mWorld * a_position).xyz;
-      v_normal = (u_mWorld * vec4(a_normal, 0)).xyz;
-    }
-</script>
-<!-- fragment shader -->
-<script id="fragment-shader" type="x-shader/x-fragment">
-    precision mediump float;
-
-    // Passed in from the vertex shader.
-    varying vec2 v_texcoord;
-    varying vec3 v_worldPos;
-    varying vec3 v_normal;
-
-    // The texture.
-    uniform sampler2D u_texture;
-
-    void main() {
-       vec2 uv = vec2(v_texcoord.x, 1.0 - v_texcoord.y);
-       vec4 col = texture2D(u_texture, uv);
-       // from #1f7b8f to albedo
-       col.rgb = min(mix(vec3(0.1215, 0.4823, 0.5607), col.rgb, pow(v_worldPos.z * 2.0 + 0.5, 0.5) * normalize(v_normal).z), col.rgb);
-       gl_FragColor = col;
-    }
-</script>
-<!--
-for most samples webgl-utils only provides shader compiling/linking and
-canvas resizing because why clutter the examples with code that's the same in every sample.
-See https://webglfundamentals.org/webgl/lessons/webgl-boilerplate.html
-and https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
-for webgl-utils, m3, m4, and webgl-lessons-ui.
--->
-<script src="resources/webgl-utils.js"></script>
-<script src="resources/m4.js"></script>
-<script src="resources/webgl-index.js"></script>
+<script type="module" src="resources/three-index.js"></script>
 </html>
 
 
