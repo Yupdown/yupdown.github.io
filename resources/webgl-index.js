@@ -9,9 +9,40 @@ function main() {
         return;
     }
 
-    var coef = new Array(200);
-    for (var i = 0; i < 200; i++) {
-        coef[i] = Math.pow((Math.random() * 2 - 1) * 2, 3);
+    // Initialize quaternion data for each cube
+    var quaternions = new Array(100);  // 100 cubes, each with a quaternion [x,y,z,w]
+    var rotationAxes = new Array(100);  // rotation axis for each cube (normalized vector)
+    var angularVelocities = new Array(100);  // rotation speed for each cube (rad/s)
+    
+    for (var i = 0; i < 100; i++) {
+        // Random rotation axis (normalized)
+        var ax = Math.random() * 2 - 1;
+        var ay = Math.random() * 2 - 1;
+        var az = Math.random() * 2 - 1;
+        var len = Math.sqrt(ax*ax + ay*ay + az*az);
+        rotationAxes[i] = [ax/len, ay/len, az/len];
+        
+        // Random angular velocity (2-4 rad/s)
+        angularVelocities[i] = Math.random() * 9 + 1;
+        
+        // Initialize identity quaternion [0, 0, 0, 1]
+        quaternions[i] = [0, 0, 0, 1];
+    }
+    
+    // Quaternion helper functions
+    function quatMultiply(q1, q2) {
+        return [
+            q1[3]*q2[0] + q1[0]*q2[3] + q1[1]*q2[2] - q1[2]*q2[1],
+            q1[3]*q2[1] - q1[0]*q2[2] + q1[1]*q2[3] + q1[2]*q2[0],
+            q1[3]*q2[2] + q1[0]*q2[1] - q1[1]*q2[0] + q1[2]*q2[3],
+            q1[3]*q2[3] - q1[0]*q2[0] - q1[1]*q2[1] - q1[2]*q2[2]
+        ];
+    }
+    
+    function quatFromAxisAngle(axis, angle) {
+        var half = angle / 2;
+        var s = Math.sin(half);
+        return [axis[0]*s, axis[1]*s, axis[2]*s, Math.cos(half)];
     }
 
     gl.enable(gl.CULL_FACE);
@@ -279,13 +310,17 @@ function main() {
             var c = Math.floor(id / 10) - 4.5;
             var x = (id % 10 - 4.5) * 0.7;
             var y = (c + Math.sign(c) * 0.15) * 0.7;
-            var t = time + 1.0;
 
-            var matrixWorld = m4.identity();
-            matrixWorld = m4.translate(matrixWorld, x, y, 0);
-            matrixWorld = m4.xRotate(matrixWorld, t * coef[id]);
-            matrixWorld = m4.zRotate(matrixWorld, t * coef[id + 100]);
-            matrixWorld = m4.scale(matrixWorld, 0.4, 0.4, 0.4);
+            // Update quaternion based on elapsed time
+            var deltaAngle = angularVelocities[id] * time;
+            var rotationQuat = quatFromAxisAngle(rotationAxes[id], deltaAngle);
+            quaternions[id] = rotationQuat;
+
+            // Create transformation matrix using quaternion
+            var translation = [x, y, 0];
+            var scale = [0.4, 0.4, 0.4];
+            var matrixWorld = m4.compose(translation, quaternions[id], scale);
+
             gl.uniformMatrix4fv(matrixLocation, false, matrixWorld);
             gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
         }
