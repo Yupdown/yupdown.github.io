@@ -206,7 +206,7 @@ function main() {
         return textureInfo;
     }
 
-    var texInfo = loadImageAndCreateTextureInfo("https://lh3.googleusercontent.com/a/ACg8ocKLyczmrfYIyoLu0Kf3S8qfDa6fqBtgIEJAAHEDDLO7PBc=s288-c-no");
+    var texInfo = loadImageAndCreateTextureInfo("./resources/icon.png");
 
     function render(time) {
         time *= 0.001; // convert to seconds
