@@ -32,7 +32,8 @@ canvas {
     width: 100%;
     min-height: 20px;
     padding: 5px;
-    overflow: auto;
+    overflow: hidden;
+    max-width: calc(100vw - 10px);
 }
 
 #container {
@@ -40,6 +41,7 @@ canvas {
     display: block;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
 }
 
 #name {
