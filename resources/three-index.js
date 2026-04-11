@@ -1,6 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js';
 
-function main() {
+async function main() {
     // Scene setup
     const canvas = document.querySelector("#canvas");
     const scene = new THREE.Scene();
@@ -121,35 +121,11 @@ function main() {
     }
     
     // Custom shader material
-    const vertexShader = `
-        varying vec2 v_texcoord;
-        varying vec3 v_worldPos;
-        varying vec3 v_normal;
-        
-        void main() {
-            gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-            v_texcoord = uv;
-            v_worldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-            v_normal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
-        }
-    `;
+    const vertexResponse = await fetch('./resources/vertex.glsl');
+    const vertexShader = await vertexResponse.text();
     
-    const fragmentShader = `
-        precision mediump float;
-        
-        varying vec2 v_texcoord;
-        varying vec3 v_worldPos;
-        varying vec3 v_normal;
-        
-        uniform sampler2D u_texture;
-        
-        void main() {
-            vec2 uv = vec2(v_texcoord.x, v_texcoord.y);
-            vec4 col = texture2D(u_texture, uv);
-            col.rgb = min(mix(vec3(0.1215, 0.4823, 0.5607), col.rgb, pow(clamp(v_worldPos.z * 2.0 + 0.5, 0.0, 1.0), 0.5) * normalize(v_normal).z), col.rgb);
-            gl_FragColor = col;
-        }
-    `;
+    const fragmentResponse = await fetch('./resources/fragment.glsl');
+    const fragmentShader = await fragmentResponse.text();
     
     // Load texture
     const textureLoader = new THREE.TextureLoader();
