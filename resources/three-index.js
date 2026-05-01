@@ -15,7 +15,11 @@ async function main() {
     const targetQuaternions = new Array(cubeCount);
     const rotationAxes = new Array(cubeCount);
     const angularVelocities = new Array(cubeCount);
-    let isMouseDown = false;
+    /**
+     * When true, cubes lerp toward look-at quaternions.
+     * Touch: fixed at the tap point. Mouse/pen: updated on pointer move while on.
+     */
+    let lookAtMode = false;
     let targetPos = null;
     let lastFrameTime = Date.now();
     const startTime = Date.now();
@@ -193,7 +197,13 @@ async function main() {
     window.addEventListener('resize', onWindowResize);
     onWindowResize();
     
-    // Helper function to update target position from mouse event
+    function clearLookAtTargets() {
+        for (let id = 0; id < cubeCount; id++) {
+            targetQuaternions[id] = null;
+        }
+    }
+
+    // World target + per-cube look-at quaternions from client coordinates (mouse/pointer clientX/Y).
     function updateTargetPosition(event) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
@@ -220,25 +230,31 @@ async function main() {
             targetQuaternions[id] = quatLookAt([p.x, p.y, p.z], targetPos);
         }
     }
-    
-    // Add mouse event listeners
-    canvas.addEventListener('mousedown', function(event) {
-        isMouseDown = true;
+
+    canvas.addEventListener(
+        'pointerdown',
+        function (event) {
+            if (event.pointerType === 'mouse' && event.button !== 0) return;
+
+            event.preventDefault();
+
+            if (lookAtMode) {
+                lookAtMode = false;
+                clearLookAtTargets();
+            } else {
+                lookAtMode = true;
+                updateTargetPosition(event);
+            }
+        },
+        { passive: false }
+    );
+
+    canvas.addEventListener('pointermove', function (event) {
+        if (!lookAtMode) return;
+        if (event.pointerType === 'touch') return;
         updateTargetPosition(event);
     });
-    
-    canvas.addEventListener('mouseup', function(event) {
-        isMouseDown = false;
-        for (let id = 0; id < cubeCount; id++) {
-            targetQuaternions[id] = null;
-        }
-    });
-    
-    canvas.addEventListener('mousemove', function(event) {
-        if (!isMouseDown) return;
-        updateTargetPosition(event);
-    });
-    
+
     // Render loop
     function render() {
         const elapsedTime = (Date.now() - startTime) / 1000;
