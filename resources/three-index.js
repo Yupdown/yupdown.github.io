@@ -7,18 +7,20 @@ async function main() {
     scene.background = new THREE.Color(0x1492ad);
     const camera = new THREE.OrthographicCamera(-1, 1, -1, 1, -1, 1);
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    
+
+    const cubeCount = 100;
+
     // Initialize quaternion data for each cube
-    const quaternions = new Array(100);
-    const targetQuaternions = new Array(100);
-    const rotationAxes = new Array(100);
-    const angularVelocities = new Array(100);
+    const quaternions = new Array(cubeCount);
+    const targetQuaternions = new Array(cubeCount);
+    const rotationAxes = new Array(cubeCount);
+    const angularVelocities = new Array(cubeCount);
     let isMouseDown = false;
     let targetPos = null;
     let lastFrameTime = Date.now();
     const startTime = Date.now();
     
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < cubeCount; i++) {
         // Random rotation axis (normalized)
         let ax = Math.random() * 2 - 1;
         let ay = Math.random() * 2 - 1;
@@ -147,19 +149,25 @@ async function main() {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     geometry.computeVertexNormals();
     
-    // Create 100 cubes
-    const cubes = [];
-    for (let i = 0; i < 100; i++) {
-        const cube = new THREE.Mesh(geometry, material);
-        const x = (i % 10 - 4.5) * 0.7;
-        const y = (Math.floor(i / 10) - 4.5) * 0.7;
-        
-        cube.position.set(x, y, 0);
-        cube.scale.set(0.4, 0.4, 0.4);
-        
-        scene.add(cube);
-        cubes.push(cube);
+    const cubeScale = new THREE.Vector3(0.4, 0.4, 0.4);
+    const cubeLocalPos = new Array(cubeCount);
+    for (let i = 0; i < cubeCount; i++) {
+        cubeLocalPos[i] = new THREE.Vector3(
+            (i % 10 - 4.5) * 0.7,
+            (Math.floor(i / 10) - 4.5) * 0.7,
+            0
+        );
     }
+
+    const instancedMesh = new THREE.InstancedMesh(geometry, material, cubeCount);
+    const instanceMatrixWork = new THREE.Matrix4();
+    for (let i = 0; i < cubeCount; i++) {
+        instanceMatrixWork.compose(cubeLocalPos[i], quaternions[i], cubeScale);
+        instancedMesh.setMatrixAt(i, instanceMatrixWork);
+    }
+    instancedMesh.instanceMatrix.needsUpdate = true;
+    instancedMesh.frustumCulled = false;
+    scene.add(instancedMesh);
     
     // Handle window resize
     function onWindowResize() {
@@ -207,10 +215,9 @@ async function main() {
         }
         
         // Calculate look-at quaternions for all cubes
-        for (let id = 0; id < 100; id++) {
-            const x = (id % 10 - 4.5) * 0.7;
-            const y = (Math.floor(id / 10) - 4.5) * 0.7;
-            targetQuaternions[id] = quatLookAt([x, y, 0], targetPos);
+        for (let id = 0; id < cubeCount; id++) {
+            const p = cubeLocalPos[id];
+            targetQuaternions[id] = quatLookAt([p.x, p.y, p.z], targetPos);
         }
     }
     
@@ -222,7 +229,7 @@ async function main() {
     
     canvas.addEventListener('mouseup', function(event) {
         isMouseDown = false;
-        for (let id = 0; id < 100; id++) {
+        for (let id = 0; id < cubeCount; id++) {
             targetQuaternions[id] = null;
         }
     });
@@ -242,7 +249,7 @@ async function main() {
         lastFrameTime = currentTime;
         const lerpFactor = Math.min(deltaTime * 8, 1);
         
-        for (let id = 0; id < 100; id++) {
+        for (let id = 0; id < cubeCount; id++) {
             let finalQuat;
             
             if (targetQuaternions[id] !== null) {
@@ -254,10 +261,12 @@ async function main() {
                 finalQuat = quatSlerp(quaternions[id], rotationQuat, lerpFactor);
                 quaternions[id] = finalQuat;
             }
-            
-            cubes[id].quaternion.copy(finalQuat);
+
+            instanceMatrixWork.compose(cubeLocalPos[id], finalQuat, cubeScale);
+            instancedMesh.setMatrixAt(id, instanceMatrixWork);
         }
-        
+        instancedMesh.instanceMatrix.needsUpdate = true;
+
         renderer.render(scene, camera);
         requestAnimationFrame(render);
     }
