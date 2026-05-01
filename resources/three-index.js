@@ -151,9 +151,8 @@ async function main() {
     const cubes = [];
     for (let i = 0; i < 100; i++) {
         const cube = new THREE.Mesh(geometry, material);
-        const c = Math.floor(i / 10) - 4.5;
         const x = (i % 10 - 4.5) * 0.7;
-        const y = (c + Math.sign(c) * 0.15) * 0.7;
+        const y = (Math.floor(i / 10) - 4.5) * 0.7;
         
         cube.position.set(x, y, 0);
         cube.scale.set(0.4, 0.4, 0.4);
@@ -209,9 +208,8 @@ async function main() {
         
         // Calculate look-at quaternions for all cubes
         for (let id = 0; id < 100; id++) {
-            const c = Math.floor(id / 10) - 4.5;
             const x = (id % 10 - 4.5) * 0.7;
-            const y = (c + Math.sign(c) * 0.15) * 0.7;
+            const y = (Math.floor(id / 10) - 4.5) * 0.7;
             targetQuaternions[id] = quatLookAt([x, y, 0], targetPos);
         }
     }
